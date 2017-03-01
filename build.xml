@@ -1,62 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="buildwar" default="deploy" basedir=".">
-    <description> Compile, Package and Deploy AppajiMaamaa</description>
-    <!-- set global properties for this build -->
-    <property name="src" location="." />
-    <property name="classes" location="." />
-    <property name="deployDest" location="/home/francois/Documents/2017/754/tut2/serenity/rw754/" />
+<target name="test" depends="junittests,jars">
+	<echo>Running JUnit test cases for FindBugs...</echo>
+	<junit fork="true" printsummary="true" showoutput="true" filtertrace="true" forkmode="once">
+		...
+		<!-- Serenity system properties. -->
+		<sysproperty key="included.packages" value="edu.umd.cs.findbugs" />
+		<sysproperty key="included.adapters" value="coverage,complexity,dependency" />
 
-    <path id="project-classpath">
-        <!-- Libraries inside project lib folder like, Spring, Logging, Hibernate -->
-        <fileset dir="./WebContent/WEB-INF/lib" includes="*.jar" />
-        <!-- Libraries inside server lib folder like, Servlet, JSP -->
-        <fileset dir="/home/francois/Documents/2017/754/tut2/serenity/rw754/lib" includes="*.jar" />
-    </path>
+                <!-- Serenity JVM command line. -->
+		<jvmarg line="-javaagent:serenity/serenity.jar" />
 
-    <target name="clean">
-        <delete dir="./build/classes">
-        </delete>
-        <echo> Cleaned old class files !</echo>
-        <delete>
-            <fileset dir="./build">
-                <include name="*.war" />
-            </fileset>
-        </delete>
-        <echo> Cleaned old war file in build folder !</echo>
-    </target>
-
-    <target name="cleanDeploy">
-        <delete>
-            <fileset dir="${deployDest}">
-                <include name="*.war" />
-                <exclude name="*/*.*" />
-            </fileset>
-        </delete>
-        <echo> Removed war files inside Server!</echo>
-        <delete dir="${deployDest}/appajimama">
-        </delete>
-        <echo> Removed Previous Deployment inside Server!</echo>
-    </target>
-    <target name="compile" depends="clean" description="compile the source ">
-        <mkdir dir="./build/classes" />
-        <javac includeantruntime="false" srcdir="${src}" destdir="${classes}" classpathref="project-classpath" />
-        <echo> Java file compiled and copied to classes folder !</echo>
-    </target>
-    <target name="buildwar" description="Building War File" depends="compile">
-        <war destfile="./build/appajimama.war" webxml="./WebContent/WEB-INF/web.xml">
-            <fileset dir="./WebContent">
-                <include name="**/*.jsp" />
-                <include name="*/*.xml" />
-                <include name="**/*.jar" />
-            </fileset>
-            <lib dir="./WebContent/WEB-INF/lib">
-            </lib>
-            <classes dir="./build/classes" />
-        </war>
-    </target>
-    <target name="deploy" depends="buildwar,cleanDeploy">
-        <copy file="./build/appajimama.war" todir="${deployDest}" overwrite="true">
-        </copy>
-    </target>
-
-</project>
+		<formatter type="xml" />
+		<classpath refid="tools.classpath" />
+		<classpath>
+			<pathelement path="${junitclasses.dir}" />
+		</classpath>
+		<!-- And run the tests. -->
+		<batchtest todir="build/junit" haltonerror="false" haltonfailure="false">
+			<fileset dir="${junitsrc.dir}">
+				<include name="**/*Test*.java" />
+			</fileset>
+		</batchtest>
+	</junit>
+</target>
